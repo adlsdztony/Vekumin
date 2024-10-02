@@ -1,6 +1,11 @@
-package icu.hku.vekumin.Alarm
+package icu.hku.vekumin.alarm
 
-data class AlarmConfig(val hour: Int, val minute: Int, val enabled: Boolean = false, val repeat: Boolean = false) {
+data class AlarmConfig(
+    val hour: Int,
+    val minute: Int,
+    val enabled: Boolean = false,
+    val repeat: Boolean = false
+) {
     fun toTimeString(): String {
         return "$hour:$minute"
     }
@@ -8,7 +13,6 @@ data class AlarmConfig(val hour: Int, val minute: Int, val enabled: Boolean = fa
     fun toConfigString(): String {
         return "AlarmConfig(hour=$hour, minute=$minute, enabled=$enabled, repeat=$repeat)"
     }
-
 
     // from config string
     companion object {

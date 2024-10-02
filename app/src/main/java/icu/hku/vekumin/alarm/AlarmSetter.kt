@@ -1,4 +1,4 @@
-package icu.hku.vekumin.Alarm
+package icu.hku.vekumin.alarm
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -24,7 +24,12 @@ class AlarmSetter {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("alarmConfig", alarmConfig.toConfigString()) // 将目标时间点传递给广播接收器
         }
-        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
 
         val calendar = Calendar.getInstance().apply {
@@ -45,7 +50,11 @@ class AlarmSetter {
                 pendingIntent
             )
         } catch (e: SecurityException) {
-            Toast.makeText(context, "Cannot schedule exact alarms: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                "Cannot schedule exact alarms: ${e.message}",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

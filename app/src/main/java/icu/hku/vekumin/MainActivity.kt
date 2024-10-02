@@ -22,8 +22,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import icu.hku.vekumin.Alarm.AlarmConfig
-import icu.hku.vekumin.Alarm.AlarmSetter
+import icu.hku.vekumin.alarm.AlarmConfig
+import icu.hku.vekumin.alarm.AlarmSetter
 import icu.hku.vekumin.ui.theme.VekuminTheme
 import java.util.Locale
 
