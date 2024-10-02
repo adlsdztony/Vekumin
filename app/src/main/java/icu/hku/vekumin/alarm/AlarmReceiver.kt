@@ -1,4 +1,4 @@
-package icu.hku.vekumin.Alarm
+package icu.hku.vekumin.alarm
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -19,7 +19,7 @@ class AlarmReceiver : BroadcastReceiver() {
         println("Received target time: $targetTime")
 
         try {
-            if (alarmConfig.repeat){
+            if (alarmConfig.repeat) {
                 // set next alarm
                 val alarmSetter = AlarmSetter()
                 alarmSetter.setAlarm(context, alarmConfig, aheadDays = 1)
