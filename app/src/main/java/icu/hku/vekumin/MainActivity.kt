@@ -22,6 +22,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import icu.hku.vekumin.Alarm.AlarmConfig
+import icu.hku.vekumin.Alarm.AlarmSetter
 import icu.hku.vekumin.ui.theme.VekuminTheme
 import java.util.Locale
 
@@ -29,6 +31,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val setter = AlarmSetter()
+        val alarmConfig = AlarmConfig(16, 44, true, true)
+        setter.setAlarm(this, alarmConfig)
 
         setContent {
             val alarmViewModel = viewModel<AlarmViewModel>()
@@ -78,6 +84,8 @@ fun StartScreen(
             .fillMaxSize()
             .padding(16.dp, 0.dp)
     ) {
+
+
         val alarms by alarmViewModel.alarms
         val showTimePicker by alarmViewModel.showTimePicker
 
