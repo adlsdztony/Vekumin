@@ -4,17 +4,14 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import icu.hku.vekumin.alarm.data.AlarmConfig
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val alarmConfigString = intent.getStringExtra("alarmConfig")
-        val alarmConfig = AlarmConfig.fromConfigString(alarmConfigString)
-        if (alarmConfig == null) {
-            Toast.makeText(context, "Error: Invalid alarm config", Toast.LENGTH_SHORT).show()
-            return
-        }
+        val alarmConfigString = intent.getStringExtra("alarmConfig")?: return
+        val alarmConfig = AlarmConfig.fromConfigString(alarmConfigString)?: return
         val targetTime = alarmConfig.toTimeString()
         println("Received target time: $targetTime")
 
