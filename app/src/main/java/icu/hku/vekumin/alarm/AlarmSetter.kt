@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms
+import icu.hku.vekumin.alarm.data.AlarmConfig
 import java.util.Calendar
 
 
@@ -26,7 +27,7 @@ class AlarmSetter {
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            0,
+            alarmConfig.id + 323,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -39,7 +40,7 @@ class AlarmSetter {
         }
 
 
-        println("Alarm set at: ${calendar.time}")
+        println("Alarm ${alarmConfig.id} set at: ${calendar.time}")
 
         val triggerAtMillis = calendar.timeInMillis + aheadDays * 24 * 60 * 60 * 1000
 
@@ -56,6 +57,19 @@ class AlarmSetter {
                 Toast.LENGTH_SHORT
             ).show()
         }
+    }
+
+    fun cancelAlarm(context: Context, alarmConfig: AlarmConfig) {
+        println("Alarm ${alarmConfig.id} at ${alarmConfig.toTimeString()} canceled")
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            alarmConfig.id + 323,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
     }
 
     private fun getHour(time: String): Int {

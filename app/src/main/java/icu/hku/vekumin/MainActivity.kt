@@ -1,14 +1,14 @@
 package icu.hku.vekumin
 
-import android.icu.util.Calendar
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
@@ -16,48 +16,55 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import icu.hku.vekumin.alarm.AlarmConfig
-import icu.hku.vekumin.alarm.AlarmSetter
+import androidx.lifecycle.ViewModelProvider
+import icu.hku.vekumin.alarm.data.AlarmConfig
+import icu.hku.vekumin.alarm.data.AlarmConfigDatabase
 import icu.hku.vekumin.ui.theme.VekuminTheme
+import icu.hku.vekumin.viewModels.alarm.AlarmViewModel
 import java.util.Locale
+import icu.hku.vekumin.viewModels.alarm.AlarmRepository
+import icu.hku.vekumin.viewModels.alarm.AlarmViewModelFactory
+import androidx.compose.foundation.lazy.items
+import icu.hku.vekumin.alarm.AlarmSetter
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val alarmSetter: AlarmSetter = AlarmSetter()
 
-        val setter = AlarmSetter()
-        val alarmConfig = AlarmConfig(16, 44, true, true)
-        setter.setAlarm(this, alarmConfig)
+        val alarmDao = AlarmConfigDatabase.getDatabase(applicationContext).alarmConfigDao()
+        val repository = AlarmRepository(
+            alarmDao,
+            onSetAlarm = { alarmSetter.setAlarm(applicationContext, it) },
+            onCancelAlarm = { alarmSetter.cancelAlarm(applicationContext, it) }
+        )
+
+        val factory = AlarmViewModelFactory(repository)
+        val viewModel = ViewModelProvider(this, factory)[AlarmViewModel::class.java]
+
+        var isTimePickerDialogVisible by mutableStateOf(false)
+
+
 
         setContent {
-            val alarmViewModel = viewModel<AlarmViewModel>()
             VekuminTheme {
-                val navController = rememberNavController()
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = { AppBar() },
                     floatingActionButton = {
-                        FloatingActionButton(onClick = { alarmViewModel.showTimePicker(true) }) {
+                        FloatingActionButton(onClick = { isTimePickerDialogVisible = true }) {
                             Icon(imageVector = Icons.Default.Add, contentDescription = "Add Alarm")
                         }
                     }) { innerPadding ->
-                    NavHost(
-                        navController = navController,
-                        startDestination = "main",
-                    ) {
-                        composable("main") {
-                            StartScreen(
-                                alarmViewModel = alarmViewModel,
-                                modifier = Modifier.padding(innerPadding)
-                            )
-                        }
-                    }
+                    AlarmApp(modifier = Modifier.padding(innerPadding),
+                        viewModel,
+                        isTimePickerDialogVisible = isTimePickerDialogVisible,
+                        onDismissTimePickerDialog = { isTimePickerDialogVisible = false }
+                    )
                 }
             }
         }
@@ -67,8 +74,12 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBar() {
+    val context = LocalContext.current
     TopAppBar(title = { Text("Vekumin") }, actions = {
-        IconButton(onClick = { /* TODO: show settings */ }) {
+        IconButton(onClick = {
+//            val intent = Intent(context, SettingActivity::class.java)
+//            context.startActivity(intent)
+        }) {
             Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
         }
     })
@@ -76,43 +87,61 @@ fun AppBar() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StartScreen(
-    alarmViewModel: AlarmViewModel, modifier: Modifier = Modifier
+fun AlarmApp(
+    modifier: Modifier = Modifier,
+    viewModel: AlarmViewModel,
+    isTimePickerDialogVisible: Boolean,
+    onDismissTimePickerDialog: () -> Unit
 ) {
+    var alarmTime by remember { mutableStateOf("") }
+    val selectedDays = remember { mutableStateListOf<Int>() }
+    val alarms by viewModel.alarms.collectAsState(initial = emptyList())
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp, 0.dp)
+            .padding(8.dp, 0.dp)
     ) {
-
-
-        val alarms by alarmViewModel.alarms
-        val showTimePicker by alarmViewModel.showTimePicker
-
-        if (showTimePicker) {
-            val currentTime = Calendar.getInstance()
+        if (isTimePickerDialogVisible) {
+            val currentTime = java.util.Calendar.getInstance()
             val timePickerState = rememberTimePickerState(
-                initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
-                initialMinute = currentTime.get(Calendar.MINUTE),
+                initialHour = currentTime.get(java.util.Calendar.HOUR_OF_DAY),
+                initialMinute = currentTime.get(java.util.Calendar.MINUTE),
                 is24Hour = true
             )
 
             TimePickerDialog(state = timePickerState,
-                onDismissRequest = { alarmViewModel.showTimePicker(false) },
+                selectedDays = selectedDays,
+                onDismissRequest = { onDismissTimePickerDialog() },
                 onConfirm = {
-                    alarmViewModel.addOrUpdateAlarm(timePickerState.hour, timePickerState.minute)
-                })
+                    val locale = Locale.getDefault()
+                    alarmTime = String.format(
+                        locale, "%02d:%02d", timePickerState.hour, timePickerState.minute
+                    )
+                    val newAlarm = AlarmConfig(
+                        hour = timePickerState.hour,
+                        minute = timePickerState.minute,
+                        daysOfWeek = selectedDays.toList(),
+                        enabled = true,
+                        repeat = !selectedDays.isEmpty()
+                    )
+                    viewModel.addAlarm(newAlarm)
+                    selectedDays.clear()
+                    alarmTime = ""
+                    onDismissTimePickerDialog()
+                }
+            )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        LazyColumn {
-            itemsIndexed(alarms) { index, (hour, minute) ->
-                AlarmItem(hour, minute, onClick = {
-                    alarmViewModel.setSelectedAlarmIndex(index)
-                    alarmViewModel.showTimePicker(true)
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(alarms) { alarm ->
+                AlarmItem(alarm = alarm, onToggle = {
+                    viewModel.updateAlarm(alarm.copy(enabled = !alarm.enabled))
+                }, onDelete = {
+                    viewModel.deleteAlarm(alarm)
                 })
-                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
@@ -121,47 +150,94 @@ fun StartScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerDialog(
-    state: TimePickerState, onDismissRequest: () -> Unit, onConfirm: () -> Unit
+    state: TimePickerState,
+    selectedDays: MutableList<Int>,
+    onDismissRequest: () -> Unit,
+    onConfirm: () -> Unit,
 ) {
+
     AlertDialog(onDismissRequest = onDismissRequest, confirmButton = {
-        TextButton(onClick = onConfirm) { Text("Confirm") }
+        TextButton(onClick = onConfirm) {
+            Text("Confirm")
+        }
     }, dismissButton = {
-        TextButton(onClick = onDismissRequest) { Text("Cancel") }
+        TextButton(onClick = onDismissRequest) {
+            Text("Cancel")
+        }
     }, text = {
-        TimePicker(state = state, modifier = Modifier.fillMaxWidth())
+        Column(modifier = Modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+            TimePicker(state = state)
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val daysOfWeek = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+
+                items(daysOfWeek.size) { index ->
+                    FilterChip(selected = selectedDays.contains(index), onClick = {
+                        if (selectedDays.contains(index)) {
+                            selectedDays.remove(index)
+                        } else {
+                            selectedDays.add(index)
+                        }
+                    }, label = { Text(daysOfWeek[index]) }, modifier = Modifier.padding(4.dp)
+                    )
+                }
+            }
+
+        }
     })
 }
 
 @Composable
-fun AlarmItem(hour: Int, minute: Int, onClick: () -> Unit) {
-    val locale = Locale.getDefault()
+fun AlarmItem(alarm: AlarmConfig, onToggle: () -> Unit, onDelete: () -> Unit) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(onDismissRequest = { showDialog = false },
+            title = { Text("Delete Alarm") },
+            text = { Text("Are you sure you want to delete this alarm?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDelete()
+                    showDialog = false
+                }) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cancel")
+                }
+            })
+    }
+
     Card(modifier = Modifier
         .fillMaxWidth()
-        .clickable { onClick() }) {
+        .padding(8.dp)
+        .pointerInput(Unit) {
+            detectTapGestures(onLongPress = {
+                showDialog = true
+            })
+        }) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = String.format(locale, "%02d:%02d", hour, minute),
-                style = MaterialTheme.typography.displayLarge
-            )
+            Column {
+                Text(text = alarm.toTimeString(), style = MaterialTheme.typography.displayLarge)
+                Text(text = if (!alarm.repeat) "One-time" else "Repeats on ${alarm.toRepeatString().joinToString(" ")}")
+            }
             Switch(
-                checked = true,
-                onCheckedChange = {},
+                checked = alarm.enabled,
+                onCheckedChange = { onToggle() },
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun StartScreenPreview() {
-    VekuminTheme {
-        StartScreen(AlarmViewModel())
-    }
-}
