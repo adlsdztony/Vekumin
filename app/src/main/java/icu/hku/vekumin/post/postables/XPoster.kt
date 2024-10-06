@@ -1,7 +1,7 @@
 package icu.hku.vekumin.post.postables
 
 import icu.hku.vekumin.post.Postable
-import icu.hku.vekumin.post.Secret
+import icu.hku.vekumin.post.data.Secret
 
 class XPoster(val secret: Secret) : Postable {
     override fun post(title: String, content: String) {
