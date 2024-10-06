@@ -10,7 +10,7 @@ import android.media.RingtoneManager
 import android.os.Build
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import icu.hku.vekumin.AuthActivity
+import icu.hku.vekumin.AlarmActivity
 import icu.hku.vekumin.R
 import icu.hku.vekumin.alarm.data.AlarmConfig
 import java.time.LocalTime
@@ -49,13 +49,17 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     private fun showFullScreenIntentNotification(context: Context) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // 创建启动 AuthActivity 的 PendingIntent
-        val fullScreenIntent = Intent(context, AuthActivity::class.java)
+        val fullScreenIntent = Intent(context, AlarmActivity::class.java)
         fullScreenIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         val fullScreenPendingIntent = PendingIntent.getActivity(
-            context, 0, fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            context,
+            0,
+            fullScreenIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         // 创建通知通道 (仅在 Android 8.0 及以上需要)
@@ -71,11 +75,9 @@ class AlarmReceiver : BroadcastReceiver() {
         // 构建通知
         val notificationBuilder = NotificationCompat.Builder(context, "alarm_channel")
             .setSmallIcon(R.drawable.ic_launcher_background) // 设置通知图标
-            .setContentTitle("Alarm Time Reached")
-            .setContentText("Tap to verify.")
+            .setContentTitle("Alarm Time Reached").setContentText("Tap to verify.")
             .setPriority(NotificationCompat.PRIORITY_HIGH) // 高优先级
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_ALARM).setAutoCancel(true)
             .setFullScreenIntent(fullScreenPendingIntent, true) // 设置全屏意图
 
         // 显示通知
