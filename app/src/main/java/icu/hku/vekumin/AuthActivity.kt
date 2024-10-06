@@ -11,11 +11,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,10 +37,11 @@ class AuthActivity : ComponentActivity() {
 
         setContent {
             VekuminTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = { AuthBar() }) { innerPadding ->
                     Auth(
-                        data = data ?: Uri.EMPTY,
-                        modifier = Modifier.padding(innerPadding)
+                        data = data ?: Uri.EMPTY, modifier = Modifier.padding(innerPadding)
                     )
                 }
             }
@@ -45,10 +49,17 @@ class AuthActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AuthBar() {
+    TopAppBar(title = { Text("Settings") })
+}
+
 @Composable
 fun PlatformItem(platform: Platform, enabled: Boolean = false) {
     val context = LocalContext.current
-    val backgroundColor = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer
+    val backgroundColor =
+        if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer
     Card(
         onClick = {
             // go to auth website
@@ -71,18 +82,17 @@ fun PlatformItem(platform: Platform, enabled: Boolean = false) {
     }
 }
 
-
 @Composable
 fun PlatformSelection(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val platform = Secret.load(context)?.platform
 
-    Column(modifier = modifier) {
-        Platform.entries.forEach {
-            PlatformItem(it, it == platform)
+    LazyColumn(modifier = modifier.padding(8.dp)) {
+        items(Platform.entries.size) { index ->
+            val platformEnum = Platform.entries[index]
+            PlatformItem(platformEnum, platform == platformEnum)
         }
     }
-
 }
 
 @Composable
@@ -95,7 +105,7 @@ fun Auth(data: Uri, modifier: Modifier = Modifier) {
     }
 
     fun getPlatformFromUri(uri: Uri): Platform? {
-        val platform = uri.getQueryParameter("platform")?: return null
+        val platform = uri.getQueryParameter("platform") ?: return null
         return try {
             Platform.valueOf(platform)
         } catch (e: IllegalArgumentException) {
@@ -103,14 +113,12 @@ fun Auth(data: Uri, modifier: Modifier = Modifier) {
         }
     }
 
-
     val platformEnum = getPlatformFromUri(data)
     if (platformEnum != null) {
         val keys = data.queryParameterNames.associateWith { data.getQueryParameter(it) ?: "" }
         Secret.fromMap(platformEnum, keys).save(context = context)
         Toast.makeText(context, "Successfully saved secret", Toast.LENGTH_SHORT).show()
     }
-
     PlatformSelection(modifier = modifier)
 }
 

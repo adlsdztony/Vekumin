@@ -1,8 +1,11 @@
 package icu.hku.vekumin
 
-
+import android.app.AlarmManager
+import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -29,6 +32,8 @@ import java.util.Locale
 import icu.hku.vekumin.viewModels.alarm.AlarmRepository
 import icu.hku.vekumin.viewModels.alarm.AlarmViewModelFactory
 import androidx.compose.foundation.lazy.items
+import androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms
+import androidx.core.content.ContextCompat.startActivity
 import icu.hku.vekumin.alarm.AlarmSetter
 
 
@@ -39,18 +44,14 @@ class MainActivity : ComponentActivity() {
         val alarmSetter: AlarmSetter = AlarmSetter()
 
         val alarmDao = AlarmConfigDatabase.getDatabase(applicationContext).alarmConfigDao()
-        val repository = AlarmRepository(
-            alarmDao,
+        val repository = AlarmRepository(alarmDao,
             onSetAlarm = { alarmSetter.setAlarm(applicationContext, it) },
-            onCancelAlarm = { alarmSetter.cancelAlarm(applicationContext, it) }
-        )
+            onCancelAlarm = { alarmSetter.cancelAlarm(applicationContext, it) })
 
         val factory = AlarmViewModelFactory(repository)
         val viewModel = ViewModelProvider(this, factory)[AlarmViewModel::class.java]
 
         var isTimePickerDialogVisible by mutableStateOf(false)
-
-
 
         setContent {
             VekuminTheme {
@@ -64,8 +65,7 @@ class MainActivity : ComponentActivity() {
                     AlarmApp(modifier = Modifier.padding(innerPadding),
                         viewModel,
                         isTimePickerDialogVisible = isTimePickerDialogVisible,
-                        onDismissTimePickerDialog = { isTimePickerDialogVisible = false }
-                    )
+                        onDismissTimePickerDialog = { isTimePickerDialogVisible = false })
                 }
             }
         }
@@ -97,6 +97,32 @@ fun AlarmApp(
     var alarmTime by remember { mutableStateOf("") }
     val selectedDays = remember { mutableStateListOf<Int>() }
     val alarms by viewModel.alarms.collectAsState(initial = emptyList())
+
+    val context = LocalContext.current
+
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+    LaunchedEffect(Unit) {
+        if (!canScheduleExactAlarms(alarmManager)) {
+            Toast.makeText(context, "Please allow the permission", Toast.LENGTH_SHORT).show()
+            val intent = Intent().apply {
+                setClassName(
+                    "com.android.settings",
+                    "com.android.settings.Settings\$AlarmsAndRemindersActivity"
+                )
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            try {
+                startActivity(context, intent, null)
+            } catch (e: ActivityNotFoundException) {
+                e.printStackTrace()
+                // Handle the failure to open the settings page
+                Toast.makeText(
+                    context, "Unable to open alarm and reminder settings page", Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
 
     Column(
         modifier = modifier
@@ -130,8 +156,7 @@ fun AlarmApp(
                     selectedDays.clear()
                     alarmTime = ""
                     onDismissTimePickerDialog()
-                }
-            )
+                })
         }
 
         LazyColumn(
@@ -231,7 +256,11 @@ fun AlarmItem(alarm: AlarmConfig, onToggle: () -> Unit, onDelete: () -> Unit) {
         ) {
             Column {
                 Text(text = alarm.toTimeString(), style = MaterialTheme.typography.displayLarge)
-                Text(text = if (!alarm.repeat) "One-time" else "Repeats on ${alarm.toRepeatString().joinToString(" ")}")
+                Text(
+                    text = if (!alarm.repeat) "One-time" else "Repeats on ${
+                        alarm.toRepeatString().joinToString(" ")
+                    }"
+                )
             }
             Switch(
                 checked = alarm.enabled,
