@@ -1,6 +1,7 @@
 package icu.hku.vekumin
 
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -77,8 +78,8 @@ fun AppBar() {
     val context = LocalContext.current
     TopAppBar(title = { Text("Vekumin") }, actions = {
         IconButton(onClick = {
-//            val intent = Intent(context, SettingActivity::class.java)
-//            context.startActivity(intent)
+            val intent = Intent(context, AuthActivity::class.java)
+            context.startActivity(intent)
         }) {
             Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
         }

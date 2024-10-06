@@ -1,6 +1,7 @@
-package icu.hku.vekumin.post
+package icu.hku.vekumin.post.data
 
 import android.content.Context
+import icu.hku.vekumin.post.Platform
 
 data class Secret(val platform: Platform, val keys: Map<String, String>) {
 
