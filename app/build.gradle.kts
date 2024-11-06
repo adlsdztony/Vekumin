@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "icu.hku.vekumin"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "icu.hku.vekumin"

@@ -62,20 +62,17 @@ class AlarmReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // 创建通知通道 (仅在 Android 8.0 及以上需要)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "alarm_channel", "Alarm Notifications", NotificationManager.IMPORTANCE_HIGH
-            )
-            channel.description = "Alarm Notification Channel"
-            channel.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM), null)
-            notificationManager.createNotificationChannel(channel)
-        }
+        val channel = NotificationChannel(
+            "alarm_channel", "Alarm Notifications", NotificationManager.IMPORTANCE_HIGH
+        )
+        channel.description = "Alarm Notification Channel"
+        channel.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM), null)
+        notificationManager.createNotificationChannel(channel)
 
         // 构建通知
         val notificationBuilder = NotificationCompat.Builder(context, "alarm_channel")
-            .setSmallIcon(R.drawable.ic_launcher_background) // 设置通知图标
-            .setContentTitle("Alarm Time Reached").setContentText("Tap to verify.")
+            .setSmallIcon(R.drawable.ic_launcher_foreground) // 设置通知图标
+            .setContentTitle("Alarm Time Reached").setContentText("Tap to Cancel")
             .setPriority(NotificationCompat.PRIORITY_HIGH) // 高优先级
             .setCategory(NotificationCompat.CATEGORY_ALARM).setAutoCancel(true)
             .setFullScreenIntent(fullScreenPendingIntent, true) // 设置全屏意图
