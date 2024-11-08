@@ -11,9 +11,9 @@ enum class Platform {
 
     val authUrl: Uri
         get() = when (this) {
-            THREAD -> Uri.parse("https://thread.icu.hku.icu/auth")
-            X -> Uri.parse("https://x.icu.hku.icu/auth")
-            FAKE -> Uri.parse("https://fake.icu.hku.icu/auth")
+            THREAD -> Uri.parse("https://vekumin.hku.icu/api/thread/oauth")
+            X -> Uri.parse("https://vekumin.hku.icu/api/twitter/oauth")
+            FAKE -> Uri.parse("https://vekumin.hku.icu/api/fake/oauth")
         }
 
     val createPoster: (Secret) -> Postable

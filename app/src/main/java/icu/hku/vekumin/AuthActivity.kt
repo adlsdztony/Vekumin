@@ -118,6 +118,8 @@ fun Auth(data: Uri, modifier: Modifier = Modifier) {
         val keys = data.queryParameterNames.associateWith { data.getQueryParameter(it) ?: "" }
         Secret.fromMap(platformEnum, keys).save(context = context)
         Toast.makeText(context, "Successfully saved secret", Toast.LENGTH_SHORT).show()
+    } else {
+        Toast.makeText(context, "Failed to save secret", Toast.LENGTH_SHORT).show()
     }
     PlatformSelection(modifier = modifier)
 }
