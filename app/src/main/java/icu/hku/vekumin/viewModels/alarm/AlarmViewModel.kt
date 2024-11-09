@@ -78,6 +78,18 @@ class AlarmViewModel(private val repository: AlarmRepository) : ViewModel() {
         }
     }
 
+    fun cancelAlarm(alarm: AlarmConfig) {
+        viewModelScope.launch {
+            repository.cancelAlarm(alarm)
+        }
+    }
+
+    fun enableAlarm(alarm: AlarmConfig) {
+        viewModelScope.launch {
+            repository.enableAlarm(alarm)
+        }
+    }
+
     fun deleteAlarm(alarm: AlarmConfig) {
         viewModelScope.launch {
             repository.deleteAlarm(alarm)
