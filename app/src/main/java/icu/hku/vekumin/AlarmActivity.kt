@@ -78,6 +78,7 @@ class AlarmActivity : ComponentActivity() {
                                 answers = answers,
                                 correctAnswersCount = correctAnswersCount,
                                 totalQuestionsCount = questions.size,
+                                currentQuestionIndex = currentQuestionIndex,
                                 onAnswerSelected = { isCorrect ->
                                     handleAnswer(isCorrect)
                                 })
@@ -85,28 +86,20 @@ class AlarmActivity : ComponentActivity() {
                     }
                 }
             }
-        } else {
-            runOnUiThread {
-                Toast.makeText(this, "All Wrong Answer :(", Toast.LENGTH_SHORT).show()
-                finish()
-            }
         }
     }
 
     private fun handleAnswer(isCorrect: Boolean) {
         if (isCorrect) {
             correctAnswersCount++
-            if (correctAnswersCount >= 5) {
-                Toast.makeText(
-                    this, "Correct! You answered 5 questions correctly.", Toast.LENGTH_SHORT
-                ).show()
-                finish()
-            } else {
-                Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show()
-                currentQuestionIndex++
-                loadQuestion()
-            }
+            Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show()
+            currentQuestionIndex++
+            loadQuestion()
         } else {
+            if (wrongAnswersCount >= 4) {
+                Toast.makeText(this, "Check Your Social Media :)", Toast.LENGTH_SHORT).show()
+                finish()
+            }
             wrongAnswersCount++
             currentQuestionIndex++
             Toast.makeText(this, "Wrong Answer :(", Toast.LENGTH_SHORT).show()
@@ -124,6 +117,7 @@ fun AlarmScreen(
     answers: List<String>,
     correctAnswersCount: Int,
     totalQuestionsCount: Int,
+    currentQuestionIndex: Int,
     onAnswerSelected: (Boolean) -> Unit
 ) {
     // get the current time
@@ -175,17 +169,18 @@ fun AlarmScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Correct: $correctAnswersCount / $totalQuestionsCount",
-                modifier = modifier,
+                text = "Answered: $currentQuestionIndex / $totalQuestionsCount",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Spacer(modifier = Modifier.padding(0.dp, 4.dp))
             Text(
-                text = question,
-                modifier = modifier,
-                style = MaterialTheme.typography.bodyLarge,
-                fontSize = 24.sp
+                text = "${5 - (currentQuestionIndex - correctAnswersCount)} ❤",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.padding(0.dp, 16.dp))
+            Text(
+                text = question, style = MaterialTheme.typography.bodyLarge, fontSize = 24.sp
             )
             Column(modifier = Modifier.padding(0.dp, 16.dp)) {
                 answers.forEach { answer ->
@@ -215,6 +210,7 @@ fun GreetingPreview() {
             answers = listOf("2", "3", "4", "5"),
             correctAnswersCount = 0,
             totalQuestionsCount = 10,
+            currentQuestionIndex = 0,
             onAnswerSelected = {})
     }
 }
