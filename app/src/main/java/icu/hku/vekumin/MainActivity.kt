@@ -167,6 +167,12 @@ fun AlarmApp(
                     viewModel.updateAlarm(alarm.copy(enabled = !alarm.enabled))
                 }, onDelete = {
                     viewModel.deleteAlarm(alarm)
+                }, onUpdate = { hour, minute, daysOfWeek ->
+                    viewModel.updateAlarm(
+                        alarm.copy(
+                            hour = hour, minute = minute, daysOfWeek = daysOfWeek
+                        )
+                    )
                 })
             }
         }
@@ -216,9 +222,17 @@ fun TimePickerDialog(
     })
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlarmItem(alarm: AlarmConfig, onToggle: () -> Unit, onDelete: () -> Unit) {
+fun AlarmItem(
+    alarm: AlarmConfig,
+    onToggle: () -> Unit,
+    onDelete: () -> Unit,
+    onUpdate: (Int, Int, List<Int>) -> Unit
+) {
     var showDialog by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    val selectedDays = remember { mutableStateListOf<Int>().apply { addAll(alarm.daysOfWeek) } }
 
     if (showDialog) {
         AlertDialog(onDismissRequest = { showDialog = false },
@@ -239,12 +253,29 @@ fun AlarmItem(alarm: AlarmConfig, onToggle: () -> Unit, onDelete: () -> Unit) {
             })
     }
 
+    if (showTimePicker) {
+        val timePickerState = rememberTimePickerState(
+            initialHour = alarm.hour, initialMinute = alarm.minute, is24Hour = true
+        )
+
+        TimePickerDialog(state = timePickerState,
+            selectedDays = selectedDays,
+            onDismissRequest = { showTimePicker = false },
+            onConfirm = {
+                alarm.repeat = selectedDays.isNotEmpty()
+                onUpdate(timePickerState.hour, timePickerState.minute, selectedDays)
+                showTimePicker = false
+            })
+    }
+
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(8.dp)
         .pointerInput(Unit) {
             detectTapGestures(onLongPress = {
                 showDialog = true
+            }, onTap = {
+                showTimePicker = true
             })
         }) {
         Row(
@@ -257,7 +288,7 @@ fun AlarmItem(alarm: AlarmConfig, onToggle: () -> Unit, onDelete: () -> Unit) {
             Column {
                 Text(text = alarm.toTimeString(), style = MaterialTheme.typography.displayLarge)
                 Text(
-                    text = if (!alarm.repeat) "One-time" else "Repeats on ${
+                    text = if (!alarm.repeat) "Every Day" else "Repeats on ${
                         alarm.toRepeatString().joinToString(" ")
                     }"
                 )
@@ -270,4 +301,3 @@ fun AlarmItem(alarm: AlarmConfig, onToggle: () -> Unit, onDelete: () -> Unit) {
         }
     }
 }
-
