@@ -13,7 +13,7 @@ data class AlarmConfig(
 ) {
     fun toConfigString(): String {
         if (daysOfWeek.isEmpty()) {
-            return "id=$id,hour=$hour,minute=$minute,daysOfWeek=empty,enabled=$enabled,repeat=$repeat"
+            return "AlarmConfig(id=$id,hour=$hour,minute=$minute,daysOfWeek=empty,enabled=$enabled,repeat=$repeat)"
         }
         return "AlarmConfig(id=$id, hour=$hour, minute=$minute, daysOfWeek=${daysOfWeek.joinToString(" ")}, enabled=$enabled, repeat=$repeat)"
     }
