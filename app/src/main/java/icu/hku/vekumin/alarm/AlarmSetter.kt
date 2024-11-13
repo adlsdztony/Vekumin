@@ -54,9 +54,12 @@ class AlarmSetter {
             set(Calendar.SECOND, 0)
         }
 
-        println("Alarm ${alarmConfig.id} set at: ${calendar.time}")
-
         val triggerAtMillis = calendar.timeInMillis + aheadDays * 24 * 60 * 60 * 1000
+
+        // back into calendar
+        val calendar2 = Calendar.getInstance()
+        calendar2.timeInMillis = triggerAtMillis
+        println("Alarm ${alarmConfig.id} set at: ${calendar2.time}")
 
         try {
             alarmManager.setExactAndAllowWhileIdle(

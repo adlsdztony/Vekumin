@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
-import android.os.Build
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import icu.hku.vekumin.AlarmActivity
@@ -15,6 +14,7 @@ import icu.hku.vekumin.R
 import icu.hku.vekumin.alarm.data.AlarmConfig
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Date
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -25,9 +25,17 @@ class AlarmReceiver : BroadcastReceiver() {
 
         try {
             if (alarmConfig.repeat) {
+                // get next alarm week day
+                val date: Date = Date()
+                val dayOfWeek = date.toInstant().atZone(java.time.ZoneId.systemDefault()).dayOfWeek.value
+                val aheadDays = alarmConfig.daysOfWeek
+                    .map { if (it >= dayOfWeek) it - dayOfWeek else 7 - dayOfWeek + it }
+                    .filter { it > 0 }
+                    .minOrNull() ?: 0
+                println("Ahead days: $aheadDays")
                 // set next alarm
                 val alarmSetter = AlarmSetter()
-                alarmSetter.setAlarm(context, alarmConfig, aheadDays = 1)
+                alarmSetter.setAlarm(context, alarmConfig, aheadDays = aheadDays)
             }
 
             val currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
@@ -36,7 +44,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 timeUp(context)
             }
 
-            Toast.makeText(context, "Current time: $currentTime", Toast.LENGTH_SHORT).show()
+            println("Current time: $currentTime")
         } catch (e: Exception) {
             Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
