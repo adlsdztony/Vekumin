@@ -18,24 +18,25 @@ import java.util.Date
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val alarmConfigString = intent.getStringExtra("alarmConfig") ?: return
-        val alarmConfig = AlarmConfig.fromConfigString(alarmConfigString) ?: return
+        println("Alarm received")
+        val alarmConfigString = intent.getStringExtra("alarmConfig")
+        if (alarmConfigString == null) {
+            println("Alarm config not found")
+            return
+        }
+        val alarmConfig = AlarmConfig.fromConfigString(alarmConfigString)
+        if (alarmConfig == null) {
+            println("Invalid alarm config: $alarmConfigString")
+            return
+        }
         val targetTime = alarmConfig.toTimeString()
         println("Received target time: $targetTime")
 
         try {
             if (alarmConfig.repeat) {
-                // get next alarm week day
-                val date: Date = Date()
-                val dayOfWeek = date.toInstant().atZone(java.time.ZoneId.systemDefault()).dayOfWeek.value
-                val aheadDays = alarmConfig.daysOfWeek
-                    .map { if (it >= dayOfWeek) it - dayOfWeek else 7 - dayOfWeek + it }
-                    .filter { it > 0 }
-                    .minOrNull() ?: 0
-                println("Ahead days: $aheadDays")
                 // set next alarm
                 val alarmSetter = AlarmSetter()
-                alarmSetter.setAlarm(context, alarmConfig, aheadDays = aheadDays)
+                alarmSetter.setAlarm(context, alarmConfig)
             }
 
             val currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
@@ -46,7 +47,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
             println("Current time: $currentTime")
         } catch (e: Exception) {
-            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            println("Error: ${e.message}")
             e.printStackTrace()
         }
     }
