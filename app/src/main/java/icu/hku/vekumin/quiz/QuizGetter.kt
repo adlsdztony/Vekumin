@@ -15,7 +15,7 @@ data class QuizResult(
     val incorrect_answers: List<String>
 )
 
-class QuizPoster {
+class QuizGetter {
     fun fetchQuizData(): QuizResponse? {
         val client = OkHttpClient()
         val request = Request.Builder()

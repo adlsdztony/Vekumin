@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import icu.hku.vekumin.quiz.QuizPoster
+import icu.hku.vekumin.quiz.QuizGetter
 import icu.hku.vekumin.quiz.QuizResult
 import icu.hku.vekumin.ui.theme.VekuminTheme
 import kotlinx.coroutines.CoroutineScope
@@ -50,7 +50,7 @@ class AlarmActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         CoroutineScope(Dispatchers.IO).launch {
-            val poster = QuizPoster()
+            val poster = QuizGetter()
             val quizData = poster.fetchQuizData()
             quizData?.let {
                 questions = it.results
@@ -86,6 +86,9 @@ class AlarmActivity : ComponentActivity() {
                     }
                 }
             }
+        } else {
+            Toast.makeText(this, "Alarm Canceled", Toast.LENGTH_SHORT).show()
+            finish()
         }
     }
 
@@ -96,7 +99,7 @@ class AlarmActivity : ComponentActivity() {
             currentQuestionIndex++
             loadQuestion()
         } else {
-            if (wrongAnswersCount >= 4) {
+            if ((5 - (currentQuestionIndex - correctAnswersCount)) == 0) {
                 Toast.makeText(this, "Check Your Social Media :)", Toast.LENGTH_SHORT).show()
                 finish()
             }
@@ -172,11 +175,13 @@ fun AlarmScreen(
                 text = "Answered: $currentQuestionIndex / $totalQuestionsCount",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 24.sp
             )
             Text(
                 text = "${5 - (currentQuestionIndex - correctAnswersCount)} ❤",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 24.sp
             )
             Spacer(modifier = Modifier.padding(0.dp, 16.dp))
             Text(
@@ -192,7 +197,12 @@ fun AlarmScreen(
                 }
             }
             Button(onClick = {
-                onAnswerSelected(selectedAnswer == correctAnswer)
+                if (selectedAnswer.isEmpty()) {
+                    Toast.makeText(activity, "Please select an answer", Toast.LENGTH_SHORT).show()
+                    return@Button
+                } else {
+                    onAnswerSelected(selectedAnswer == correctAnswer)
+                }
             }) {
                 Text("Submit")
             }
