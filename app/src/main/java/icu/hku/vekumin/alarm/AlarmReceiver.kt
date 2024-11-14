@@ -33,11 +33,9 @@ class AlarmReceiver : BroadcastReceiver() {
         println("Received target time: $targetTime")
 
         try {
-            if (alarmConfig.repeat) {
-                // set next alarm
-                val alarmSetter = AlarmSetter()
-                alarmSetter.setAlarm(context, alarmConfig)
-            }
+            // set next alarm
+            val alarmSetter = AlarmSetter()
+            alarmSetter.setAlarm(context, alarmConfig)
 
             val currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
 

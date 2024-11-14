@@ -60,15 +60,22 @@ class AlarmSetter {
             val dayOfWeek = date.toInstant().atZone(java.time.ZoneId.systemDefault()).dayOfWeek.value
             aheadDays = alarmConfig.daysOfWeek
                 .map { if (it >= dayOfWeek) it - dayOfWeek else 7 - dayOfWeek + it }
-                .filter { it > 0 }
                 .minOrNull() ?: 0
-            if (aheadDays == 0) {
-                if (date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalTime().isAfter(
-                        java.time.LocalTime.of(getHour(targetTime), getMinute(targetTime))
-                    )
-                ) {
+            if (date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalTime().isAfter(
+                    java.time.LocalTime.of(getHour(targetTime), getMinute(targetTime))
+                )
+            ) {
+                aheadDays = alarmConfig.daysOfWeek
+                    .map { if (it >= dayOfWeek) it - dayOfWeek else 7 - dayOfWeek + it }
+                    .filter { it > 0 }
+                    .minOrNull() ?: 0
+                if (aheadDays == 0) {
                     aheadDays = 7
                 }
+            } else {
+                aheadDays = alarmConfig.daysOfWeek
+                    .map { if (it >= dayOfWeek) it - dayOfWeek else 7 - dayOfWeek + it }
+                    .minOrNull() ?: 0
             }
         } else {
             if (calendar.before(Calendar.getInstance())) {
