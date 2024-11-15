@@ -17,6 +17,14 @@ data class Secret(val platform: Platform, val keys: Map<String, String>) {
             val keys = sharedPref.all.filterKeys { it != "platform" } .mapValues { it.value as String }
             return Secret(Platform.valueOf(platform), keys)
         }
+
+        fun clear(context: Context) {
+            val sharedPref = context.getSharedPreferences("secret", Context.MODE_PRIVATE)
+            with(sharedPref.edit()) {
+                clear()
+                apply()
+            }
+        }
     }
 
     fun save(context: Context) {
