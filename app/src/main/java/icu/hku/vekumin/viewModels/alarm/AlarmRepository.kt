@@ -4,8 +4,11 @@ import icu.hku.vekumin.alarm.data.AlarmConfig
 import icu.hku.vekumin.alarm.data.AlarmConfigDao
 
 
-
-class AlarmRepository(private val alarmDao: AlarmConfigDao, private val onSetAlarm: (AlarmConfig) -> Unit, private val onCancelAlarm: (AlarmConfig) -> Unit) {
+class AlarmRepository(
+    private val alarmDao: AlarmConfigDao,
+    private val onSetAlarm: (AlarmConfig) -> Unit,
+    private val onCancelAlarm: (AlarmConfig) -> Unit
+) {
 
 
     suspend fun getAllAlarms() = alarmDao.getAllAlarms()
@@ -18,6 +21,7 @@ class AlarmRepository(private val alarmDao: AlarmConfigDao, private val onSetAla
 
     suspend fun updateAlarm(alarm: AlarmConfig) {
         alarmDao.updateAlarm(alarm)
+        onSetAlarm(alarm)
     }
 
     suspend fun cancelAlarm(alarm: AlarmConfig) {

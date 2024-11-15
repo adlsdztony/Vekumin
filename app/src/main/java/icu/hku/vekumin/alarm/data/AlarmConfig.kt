@@ -1,4 +1,5 @@
 package icu.hku.vekumin.alarm.data
+
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -9,13 +10,17 @@ data class AlarmConfig(
     val minute: Int,
     val daysOfWeek: List<Int>,
     val enabled: Boolean = false,
-    val repeat: Boolean = false,
+    var repeat: Boolean = false,
 ) {
     fun toConfigString(): String {
         if (daysOfWeek.isEmpty()) {
             return "AlarmConfig(id=$id,hour=$hour,minute=$minute,daysOfWeek=empty,enabled=$enabled,repeat=$repeat)"
         }
-        return "AlarmConfig(id=$id, hour=$hour, minute=$minute, daysOfWeek=${daysOfWeek.joinToString(" ")}, enabled=$enabled, repeat=$repeat)"
+        return "AlarmConfig(id=$id, hour=$hour, minute=$minute, daysOfWeek=${
+            daysOfWeek.joinToString(
+                " "
+            )
+        }, enabled=$enabled, repeat=$repeat)"
     }
 
     fun toTimeString(): String {
@@ -35,7 +40,9 @@ data class AlarmConfig(
                     4 -> "Thu"
                     5 -> "Fri"
                     6 -> "Sat"
-                    else -> { "" }
+                    else -> {
+                        ""
+                    }
                 }
             }
         }
