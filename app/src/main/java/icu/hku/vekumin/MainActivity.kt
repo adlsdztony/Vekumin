@@ -32,6 +32,7 @@ import java.util.Locale
 import icu.hku.vekumin.viewModels.alarm.AlarmRepository
 import icu.hku.vekumin.viewModels.alarm.AlarmViewModelFactory
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.Build
 import androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms
 import androidx.core.content.ContextCompat.startActivity
 import icu.hku.vekumin.alarm.AlarmSetter
@@ -82,6 +83,14 @@ fun AppBar() {
             context.startActivity(intent)
         }) {
             Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
+        }
+        IconButton(
+            onClick = {
+                val intent = Intent(context, AlarmActivity::class.java)
+                context.startActivity(intent)
+            }
+        ) {
+            Icon(imageVector = Icons.Default.Build, contentDescription = "Alarm")
         }
     })
 }
