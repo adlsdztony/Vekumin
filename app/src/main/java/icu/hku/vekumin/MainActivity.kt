@@ -164,6 +164,11 @@ fun AlarmApp(
         ) {
             items(alarms) { alarm ->
                 AlarmItem(alarm = alarm, onToggle = {
+                    if (alarm.enabled) {
+                        viewModel.cancelAlarm(alarm)
+                    } else {
+                        viewModel.enableAlarm(alarm)
+                    }
                     viewModel.updateAlarm(alarm.copy(enabled = !alarm.enabled))
                 }, onDelete = {
                     viewModel.deleteAlarm(alarm)

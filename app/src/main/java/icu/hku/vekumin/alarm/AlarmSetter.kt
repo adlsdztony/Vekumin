@@ -10,9 +10,10 @@ import androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms
 import androidx.core.content.ContextCompat.startActivity
 import icu.hku.vekumin.alarm.data.AlarmConfig
 import java.util.Calendar
+import java.util.Date
 
 class AlarmSetter {
-    fun setAlarm(context: Context, alarmConfig: AlarmConfig, aheadDays: Int = 0) {
+    fun setAlarm(context: Context, alarmConfig: AlarmConfig) {
         val targetTime = alarmConfig.toTimeString()
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -53,10 +54,42 @@ class AlarmSetter {
             set(Calendar.MINUTE, getMinute(targetTime))
             set(Calendar.SECOND, 0)
         }
-
-        println("Alarm ${alarmConfig.id} set at: ${calendar.time}")
+        var aheadDays = 0
+        if (alarmConfig.repeat) {
+            val date: Date = Date()
+            val dayOfWeek = date.toInstant().atZone(java.time.ZoneId.systemDefault()).dayOfWeek.value
+            aheadDays = alarmConfig.daysOfWeek
+                .map { if (it >= dayOfWeek) it - dayOfWeek else 7 - dayOfWeek + it }
+                .minOrNull() ?: 0
+            if (date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalTime().isAfter(
+                    java.time.LocalTime.of(getHour(targetTime), getMinute(targetTime))
+                )
+            ) {
+                aheadDays = alarmConfig.daysOfWeek
+                    .map { if (it >= dayOfWeek) it - dayOfWeek else 7 - dayOfWeek + it }
+                    .filter { it > 0 }
+                    .minOrNull() ?: 0
+                if (aheadDays == 0) {
+                    aheadDays = 7
+                }
+            } else {
+                aheadDays = alarmConfig.daysOfWeek
+                    .map { if (it >= dayOfWeek) it - dayOfWeek else 7 - dayOfWeek + it }
+                    .minOrNull() ?: 0
+            }
+        } else {
+            if (calendar.before(Calendar.getInstance())) {
+                aheadDays = 1
+            }
+        }
+        println("Ahead days: $aheadDays")
 
         val triggerAtMillis = calendar.timeInMillis + aheadDays * 24 * 60 * 60 * 1000
+
+        // back into calendar
+        val calendar2 = Calendar.getInstance()
+        calendar2.timeInMillis = triggerAtMillis
+        println("Alarm ${alarmConfig.id} set at: ${calendar2.time}")
 
         try {
             alarmManager.setExactAndAllowWhileIdle(

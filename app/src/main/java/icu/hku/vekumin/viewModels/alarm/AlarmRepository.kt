@@ -24,6 +24,14 @@ class AlarmRepository(
         onSetAlarm(alarm)
     }
 
+    suspend fun cancelAlarm(alarm: AlarmConfig) {
+        onCancelAlarm(alarm)
+    }
+
+    suspend fun enableAlarm(alarm: AlarmConfig) {
+        onSetAlarm(alarm)
+    }
+
     suspend fun deleteAlarm(alarm: AlarmConfig) {
         alarmDao.deleteAlarm(alarm)
         onCancelAlarm(alarm)

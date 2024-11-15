@@ -14,7 +14,7 @@ data class AlarmConfig(
 ) {
     fun toConfigString(): String {
         if (daysOfWeek.isEmpty()) {
-            return "id=$id,hour=$hour,minute=$minute,daysOfWeek=empty,enabled=$enabled,repeat=$repeat"
+            return "AlarmConfig(id=$id,hour=$hour,minute=$minute,daysOfWeek=empty,enabled=$enabled,repeat=$repeat)"
         }
         return "AlarmConfig(id=$id, hour=$hour, minute=$minute, daysOfWeek=${
             daysOfWeek.joinToString(
@@ -50,6 +50,11 @@ data class AlarmConfig(
 
     companion object {
         fun fromConfigString(configString: String): AlarmConfig? {
+            if (!configString.startsWith("AlarmConfig(")) {
+                return null
+            }
+            // get config string inside the parentheses
+            val configString = configString.substringAfter("(").substringBefore(")")
             val config = configString.split(",")
             if (config.size != 6) {
                 return null
@@ -70,3 +75,16 @@ data class AlarmConfig(
         }
     }
 }
+
+
+//// test
+//fun main() {
+//    val alarmConfig = AlarmConfig(1, 8, 0, listOf(1, 3, 5), true, true)
+//    println("Alarm config: $alarmConfig")
+//    val configString = alarmConfig.toConfigString()
+//    println("Alarm config string: $configString")
+//    val parsedAlarmConfig = AlarmConfig.fromConfigString(configString)
+//    println("Parsed alarm config: $parsedAlarmConfig")
+//    println("Parsed alarm config repeat string: ${parsedAlarmConfig?.toRepeatString()}")
+//    println("Parsed alarm config time string: ${parsedAlarmConfig?.toTimeString()}")
+//}

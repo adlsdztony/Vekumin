@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
-import android.os.Build
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import icu.hku.vekumin.AlarmActivity
@@ -15,20 +14,28 @@ import icu.hku.vekumin.R
 import icu.hku.vekumin.alarm.data.AlarmConfig
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Date
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val alarmConfigString = intent.getStringExtra("alarmConfig") ?: return
-        val alarmConfig = AlarmConfig.fromConfigString(alarmConfigString) ?: return
+        println("Alarm received")
+        val alarmConfigString = intent.getStringExtra("alarmConfig")
+        if (alarmConfigString == null) {
+            println("Alarm config not found")
+            return
+        }
+        val alarmConfig = AlarmConfig.fromConfigString(alarmConfigString)
+        if (alarmConfig == null) {
+            println("Invalid alarm config: $alarmConfigString")
+            return
+        }
         val targetTime = alarmConfig.toTimeString()
         println("Received target time: $targetTime")
 
         try {
-            if (alarmConfig.repeat) {
-                // set next alarm
-                val alarmSetter = AlarmSetter()
-                alarmSetter.setAlarm(context, alarmConfig, aheadDays = 1)
-            }
+            // set next alarm
+            val alarmSetter = AlarmSetter()
+            alarmSetter.setAlarm(context, alarmConfig)
 
             val currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
 
@@ -36,9 +43,9 @@ class AlarmReceiver : BroadcastReceiver() {
                 timeUp(context)
             }
 
-            Toast.makeText(context, "Current time: $currentTime", Toast.LENGTH_SHORT).show()
+            println("Current time: $currentTime")
         } catch (e: Exception) {
-            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            println("Error: ${e.message}")
             e.printStackTrace()
         }
     }

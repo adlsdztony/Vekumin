@@ -2,6 +2,7 @@ package icu.hku.vekumin.post.data
 
 import android.content.Context
 import icu.hku.vekumin.post.Platform
+import icu.hku.vekumin.post.Postable
 
 data class Secret(val platform: Platform, val keys: Map<String, String>) {
 
@@ -27,6 +28,10 @@ data class Secret(val platform: Platform, val keys: Map<String, String>) {
             }
             apply()
         }
+    }
+
+    fun createPoster(): Postable {
+        return platform.createPoster(this)
     }
 }
 
