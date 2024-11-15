@@ -35,6 +35,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms
 import androidx.core.content.ContextCompat.startActivity
 import icu.hku.vekumin.alarm.AlarmSetter
+import icu.hku.vekumin.post.data.Secret
 
 
 class MainActivity : ComponentActivity() {
@@ -58,7 +59,12 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = { AppBar() },
                     floatingActionButton = {
-                        FloatingActionButton(onClick = { isTimePickerDialogVisible = true }) {
+                        FloatingActionButton(onClick = {
+                            // check if there is a secret
+                            Secret.load(applicationContext)?.let {
+                                isTimePickerDialogVisible = true
+                            } ?: Toast.makeText(applicationContext, "Please set a secret first", Toast.LENGTH_SHORT).show()
+                        }) {
                             Icon(imageVector = Icons.Default.Add, contentDescription = "Add Alarm")
                         }
                     }) { innerPadding ->
