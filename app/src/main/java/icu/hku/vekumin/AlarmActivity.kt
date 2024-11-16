@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.HtmlCompat
 import icu.hku.vekumin.quiz.QuizGetter
 import icu.hku.vekumin.quiz.QuizResult
 import icu.hku.vekumin.ui.theme.VekuminTheme
@@ -40,6 +41,11 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 class AlarmActivity : ComponentActivity() {
+
+    fun decodeHtmlEntities(text: String): String {
+        return HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
+    }
+
     private var currentQuestionIndex = 0
     private var correctAnswersCount = 0
     private var wrongAnswersCount = 0
@@ -53,7 +59,11 @@ class AlarmActivity : ComponentActivity() {
             val poster = QuizGetter()
             val quizData = poster.fetchQuizData()
             quizData?.let {
-                questions = it.results
+                questions = it.results.map { result ->
+                    QuizResult(question = decodeHtmlEntities(result.question),
+                        correct_answer = decodeHtmlEntities(result.correct_answer),
+                        incorrect_answers = result.incorrect_answers.map { decodeHtmlEntities(it) })
+                }
                 loadQuestion()
             }
         }
@@ -196,15 +206,18 @@ fun AlarmScreen(
                     }
                 }
             }
-            Button(onClick = {
-                if (selectedAnswer.isEmpty()) {
-                    Toast.makeText(activity, "Please select an answer", Toast.LENGTH_SHORT).show()
-                    return@Button
-                } else {
-                    onAnswerSelected(selectedAnswer == correctAnswer)
+            Column {
+                Button(onClick = {
+                    if (selectedAnswer.isEmpty()) {
+                        Toast.makeText(activity, "Please select an answer", Toast.LENGTH_SHORT)
+                            .show()
+                        return@Button
+                    } else {
+                        onAnswerSelected(selectedAnswer == correctAnswer)
+                    }
+                }) {
+                    Text("Submit")
                 }
-            }) {
-                Text("Submit")
             }
         }
     }
