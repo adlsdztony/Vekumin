@@ -10,7 +10,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -18,8 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +38,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import icu.hku.vekumin.quiz.QuizGetter
 import icu.hku.vekumin.quiz.QuizResult
 import icu.hku.vekumin.ui.theme.VekuminTheme
@@ -61,6 +65,13 @@ class AlarmActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsControllerCompat(window, window.decorView).let { controller ->
+            controller.hide(WindowInsetsCompat.Type.statusBars())
+            controller.hide(WindowInsetsCompat.Type.navigationBars())
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
 
         CoroutineScope(Dispatchers.IO).launch {
             val poster = QuizGetter()
@@ -159,6 +170,7 @@ fun AlarmScreen(
         Toast.makeText(activity, "Check Your Social Media :)", Toast.LENGTH_SHORT).show()
         activity.finish()
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -174,7 +186,7 @@ fun AlarmScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(32.dp)
+                .padding(64.dp)
         ) {
             Text(
                 text = currentTime,
@@ -215,41 +227,38 @@ fun AlarmScreen(
                 .align(Alignment.BottomCenter)
                 .padding(32.dp)
         ) {
-
-            Spacer(modifier = Modifier.padding(0.dp, 16.dp))
             Text(
                 text = question,
                 style = MaterialTheme.typography.bodyLarge,
                 fontSize = 24.sp,
-                color = Color.White.copy(alpha = 0.8f)
+                color = Color.White
             )
-            Column(modifier = Modifier.padding(0.dp, 16.dp)) {
-                answers.forEach { answer ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(selected = selectedAnswer == answer,
-                            onClick = { selectedAnswer = answer })
-                        Text(text = answer, color = Color.White.copy(alpha = 0.8f))
+            Column(modifier = Modifier.padding(0.dp, 32.dp)) {
+                SingleChoiceSegmentedButtonRow {
+                    answers.forEachIndexed { index, answer ->
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index, count = answers.size
+                            ), selected = selectedAnswer == answer, onClick = {
+                                selectedAnswer = answer
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    delay(500)
+                                    onAnswerSelected(selectedAnswer == correctAnswer)
+                                    selectedAnswer = ""
+                                }
+                            }, colors = SegmentedButtonDefaults.colors(
+                                activeContainerColor = Color.White,
+                                activeContentColor = Color.Black,
+                                inactiveContainerColor = Color.Transparent,
+                                inactiveContentColor = Color.White
+                            )
+                        ) {
+                            Text(answer)
+                        }
                     }
                 }
             }
-            Column(modifier = Modifier.height(48.dp)) {
-                Button(
-                    onClick = {
-                        if (selectedAnswer.isEmpty()) {
-                            Toast.makeText(activity, "Please select an answer", Toast.LENGTH_SHORT)
-                                .show()
-                            return@Button
-                        } else {
-                            onAnswerSelected(selectedAnswer == correctAnswer)
-                            selectedAnswer = ""
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                    border = BorderStroke(1.dp, Color.White)
-                ) {
-                    Text("Submit", color = Color.White, modifier = Modifier.padding(16.dp, 0.dp))
-                }
-            }
+            Spacer(modifier = Modifier.height(64.dp))
         }
     }
 }
