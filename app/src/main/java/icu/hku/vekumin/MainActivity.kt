@@ -37,6 +37,7 @@ import androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.startActivity
 import icu.hku.vekumin.alarm.AlarmSetter
+import icu.hku.vekumin.post.data.PostConfig
 import icu.hku.vekumin.post.data.Secret
 import icu.hku.vekumin.quiz.data.QuizConfig
 
@@ -100,7 +101,14 @@ class MainActivity : ComponentActivity() {
         // initialize the quiz config
         val quizConfig = QuizConfig.load(applicationContext) ?: QuizConfig(values = emptyMap())
         if (quizConfig.values.isEmpty()) {
-            quizConfig.set("amount", "5").set("category", "18").set("difficulty", "easy")
+            quizConfig.set("amount", "5").set("difficulty", "easy").set("health", "3")
+                .save(applicationContext)
+        }
+
+        // initialize the post config
+        val postConfig = PostConfig.load(applicationContext) ?: PostConfig(values = emptyMap())
+        if (postConfig.values.isEmpty()) {
+            postConfig.set("title", "Post Title").set("content", "Post Content")
                 .save(applicationContext)
         }
 

@@ -32,6 +32,8 @@ import icu.hku.vekumin.post.data.Secret
 import icu.hku.vekumin.ui.theme.VekuminTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import icu.hku.vekumin.post.data.PostConfig
+import icu.hku.vekumin.quiz.data.QuizConfig
 
 class AuthActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,9 +110,64 @@ fun PlatformSelection(modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun SettingItem(title: String, contant: String?, onEdit: () -> Unit) {
+    Card(
+        onClick = {
+            onEdit()
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp, 4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+            if (contant != null) {
+                Text(text = contant, style = MaterialTheme.typography.bodySmall)
+            }
+        }
+}
+    }
+
+@Composable
+fun QuizSettings(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val quizConfig = QuizConfig.load(context)
+    Column(modifier = modifier) {
+        SettingItem("amount: ${quizConfig?.get("amount")}", "Click to edit", onEdit = {
+            // TODO: edit amount
+        })
+        SettingItem("difficulty: ${quizConfig?.get("difficulty")}", "Click to edit", onEdit = {
+            // TODO: edit difficulty
+        })
+        SettingItem("health: ${quizConfig?.get("health")}", "Click to edit", onEdit = {
+            // TODO: edit health
+        })
+    }
+}
+
+@Composable
+fun PostSetting(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val postConfig = PostConfig.load(context)
+    Column(modifier = modifier) {
+        SettingItem("Post title", "Click to edit", onEdit = {
+            // TODO: edit title
+        })
+        SettingItem("Post content", "Click to edit", onEdit = {
+            // TODO: edit content
+        })
+    }
+}
+
+@Composable
 fun Section(title: String, content: @Composable () -> Unit) {
     Column {
-        Text(text = title, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(16.dp, 0.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(16.dp, 0.dp)
+        )
         content()
     }
 }
@@ -122,6 +179,13 @@ fun SettingPage(modifier: Modifier = Modifier) {
             PlatformSelection()
         }
         Spacer(modifier = Modifier.padding(0.dp, 8.dp))
+        Section(title = "Post") {
+            PostSetting()
+        }
+        Spacer(modifier = Modifier.padding(0.dp, 8.dp))
+        Section(title = "Quiz") {
+            QuizSettings()
+        }
     }
 }
 
