@@ -57,7 +57,7 @@ class AlarmActivity : ComponentActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             val poster = QuizGetter()
-            val quizData = poster.fetchQuizData()
+            val quizData = poster.fetchQuizData(this@AlarmActivity)
             quizData?.let {
                 questions = it.results.map { result ->
                     QuizResult(question = decodeHtmlEntities(result.question),

@@ -38,6 +38,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.startActivity
 import icu.hku.vekumin.alarm.AlarmSetter
 import icu.hku.vekumin.post.data.Secret
+import icu.hku.vekumin.quiz.data.QuizConfig
 
 
 class MainActivity : ComponentActivity() {
@@ -59,7 +60,11 @@ class MainActivity : ComponentActivity() {
         // check alarm setting permission
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         if (!canScheduleExactAlarms(alarmManager)) {
-            Toast.makeText(applicationContext, "Please allow the alarm permission", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                applicationContext,
+                "Please allow the alarm permission",
+                Toast.LENGTH_SHORT
+            ).show()
             val intent = Intent().apply {
                 setClassName(
                     "com.android.settings",
@@ -73,17 +78,30 @@ class MainActivity : ComponentActivity() {
                 e.printStackTrace()
                 // Handle the failure to open the settings page
                 Toast.makeText(
-                    applicationContext, "Unable to open alarm and reminder settings page", Toast.LENGTH_SHORT
+                    applicationContext,
+                    "Unable to open alarm and reminder settings page",
+                    Toast.LENGTH_SHORT
                 ).show()
             }
         }
 
         // check full screen notification permission
         if (!NotificationManagerCompat.from(applicationContext).areNotificationsEnabled()) {
-            Toast.makeText(applicationContext, "Please allow the notification permission", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                applicationContext,
+                "Please allow the notification permission",
+                Toast.LENGTH_SHORT
+            ).show()
             val intent = Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
             intent.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
             startActivity(intent)
+        }
+
+        // initialize the quiz config
+        val quizConfig = QuizConfig.load(applicationContext) ?: QuizConfig(values = emptyMap())
+        if (quizConfig.values.isEmpty()) {
+            quizConfig.set("amount", "5").set("category", "18").set("difficulty", "easy")
+                .save(applicationContext)
         }
 
         setContent {
@@ -95,7 +113,11 @@ class MainActivity : ComponentActivity() {
                             // check if there is a secret
                             Secret.load(applicationContext)?.let {
                                 isTimePickerDialogVisible = true
-                            } ?: Toast.makeText(applicationContext, "Please set a secret first", Toast.LENGTH_SHORT).show()
+                            } ?: Toast.makeText(
+                                applicationContext,
+                                "Please set a secret first",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }) {
                             Icon(imageVector = Icons.Default.Add, contentDescription = "Add Alarm")
                         }
