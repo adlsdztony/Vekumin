@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.TextClock
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -33,6 +34,7 @@ import icu.hku.vekumin.viewModels.alarm.AlarmRepository
 import icu.hku.vekumin.viewModels.alarm.AlarmViewModelFactory
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.startActivity
@@ -162,6 +164,42 @@ fun AppBar() {
     })
 }
 
+@Composable
+fun TextClock(modifier: Modifier = Modifier) {
+    // on below line we are creating
+    // a column on below sides.
+    Column(
+        // on below line we are adding padding
+        // padding for our column and filling the max size.
+        modifier = modifier
+            .fillMaxWidth(),
+        // on below line we are adding
+        // horizontal alignment for our column
+        horizontalAlignment = Alignment.CenterHorizontally,
+        // on below line we are adding
+        // vertical arrangement for our column
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        // on below line we are creating a text clock.
+        AndroidView(
+            // on below line we are initializing our text clock.
+            factory = { context ->
+                TextClock(context).apply {
+                    // on below line we are setting 12 hour format.
+                    format12Hour?.let { this.format12Hour = "hh:mm:ss a" }
+                    // on below line we are setting time zone.
+                    timeZone?.let { this.timeZone = it }
+                    // on below line we are setting text size.
+                    textSize.let { this.textSize = 64f }
+                }
+            },
+            // on below line we are adding padding.
+            modifier = Modifier.padding(0.dp, 24.dp),
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlarmApp(
@@ -234,6 +272,8 @@ fun AlarmApp(
                     onDismissTimePickerDialog()
                 })
         }
+
+        TextClock()
 
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
