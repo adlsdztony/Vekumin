@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -77,7 +78,7 @@ fun PlatformItem(platform: Platform, currentPlatform: Platform?, onDisable: () -
         },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp, 4.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)  // 根据条件设置背景色
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -94,8 +95,7 @@ fun PlatformItem(platform: Platform, currentPlatform: Platform?, onDisable: () -
 fun PlatformSelection(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var platform by remember { mutableStateOf<Platform?>(Secret.load(context)?.platform) }
-
-    LazyColumn(modifier = modifier.padding(8.dp)) {
+    LazyColumn(modifier = modifier) {
         items(Platform.entries.size) { index ->
             val platformEnum = Platform.entries[index]
             PlatformItem(platformEnum, platform, onDisable = {
@@ -108,11 +108,29 @@ fun PlatformSelection(modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun Section(title: String, content: @Composable () -> Unit) {
+    Column {
+        Text(text = title, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(16.dp, 0.dp))
+        content()
+    }
+}
+
+@Composable
+fun SettingPage(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.padding(8.dp)) {
+        Section(title = "Platform") {
+            PlatformSelection()
+        }
+        Spacer(modifier = Modifier.padding(0.dp, 8.dp))
+    }
+}
+
+@Composable
 fun Auth(data: Uri, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     // if data is empty, show platform selection
     if (data == Uri.EMPTY) {
-        PlatformSelection(modifier = modifier)
+        SettingPage(modifier = modifier)
         return
     }
 
@@ -134,7 +152,7 @@ fun Auth(data: Uri, modifier: Modifier = Modifier) {
     } ?: run {
         Toast.makeText(context, "Failed to save secret", Toast.LENGTH_SHORT).show()
     }
-    PlatformSelection(modifier = modifier)
+    SettingPage(modifier = modifier)
 }
 
 @Preview(showBackground = true)
