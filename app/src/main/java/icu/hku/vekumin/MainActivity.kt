@@ -34,6 +34,7 @@ import icu.hku.vekumin.viewModels.alarm.AlarmViewModelFactory
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Build
 import androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.startActivity
 import icu.hku.vekumin.alarm.AlarmSetter
 import icu.hku.vekumin.post.data.Secret
@@ -54,6 +55,36 @@ class MainActivity : ComponentActivity() {
         val viewModel = ViewModelProvider(this, factory)[AlarmViewModel::class.java]
 
         var isTimePickerDialogVisible by mutableStateOf(false)
+
+        // check alarm setting permission
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        if (!canScheduleExactAlarms(alarmManager)) {
+            Toast.makeText(applicationContext, "Please allow the alarm permission", Toast.LENGTH_SHORT).show()
+            val intent = Intent().apply {
+                setClassName(
+                    "com.android.settings",
+                    "com.android.settings.Settings\$AlarmsAndRemindersActivity"
+                )
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            try {
+                startActivity(applicationContext, intent, null)
+            } catch (e: ActivityNotFoundException) {
+                e.printStackTrace()
+                // Handle the failure to open the settings page
+                Toast.makeText(
+                    applicationContext, "Unable to open alarm and reminder settings page", Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        // check full screen notification permission
+        if (!NotificationManagerCompat.from(applicationContext).areNotificationsEnabled()) {
+            Toast.makeText(applicationContext, "Please allow the notification permission", Toast.LENGTH_SHORT).show()
+            val intent = Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            intent.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+            startActivity(intent)
+        }
 
         setContent {
             VekuminTheme {
