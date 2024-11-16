@@ -11,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -34,6 +35,8 @@ import icu.hku.vekumin.viewModels.alarm.AlarmRepository
 import icu.hku.vekumin.viewModels.alarm.AlarmViewModelFactory
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms
 import androidx.core.app.NotificationManagerCompat
@@ -166,6 +169,7 @@ fun AppBar() {
 
 @Composable
 fun TextClock(modifier: Modifier = Modifier) {
+    val isDarkTheme = isSystemInDarkTheme()
     // on below line we are creating
     // a column on below sides.
     Column(
@@ -186,12 +190,20 @@ fun TextClock(modifier: Modifier = Modifier) {
             // on below line we are initializing our text clock.
             factory = { context ->
                 TextClock(context).apply {
+                    // on below line we are setting 24 hour format.
+                    format24Hour?.let { this.format24Hour = "HH:mm:ss" }
                     // on below line we are setting 12 hour format.
-                    format12Hour?.let { this.format12Hour = "hh:mm:ss a" }
+                    format12Hour?.let { this.format12Hour = "HH:mm:ss" }
                     // on below line we are setting time zone.
                     timeZone?.let { this.timeZone = it }
                     // on below line we are setting text size.
                     textSize.let { this.textSize = 64f }
+                    // on below line we are setting text color based on theme.
+                    textColors?.let {
+                        this.setTextColor(
+                            if (isDarkTheme) Color.White.toArgb() else Color.Black.toArgb()
+                        )
+                    }
                 }
             },
             // on below line we are adding padding.
