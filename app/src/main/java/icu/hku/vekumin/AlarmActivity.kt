@@ -143,9 +143,10 @@ class AlarmActivity : ComponentActivity() {
                     Secret.load(context)?.createPoster()?.post(title, content)
                 }
                 finish()
+            } else {
+                loadQuestion()
             }
 //            Toast.makeText(this, "Wrong Answer :(", Toast.LENGTH_SHORT).show()
-            loadQuestion()
         }
     }
 }
