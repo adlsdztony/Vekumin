@@ -38,8 +38,11 @@ import androidx.core.text.HtmlCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import icu.hku.vekumin.post.data.PostConfig
+import icu.hku.vekumin.post.data.Secret
 import icu.hku.vekumin.quiz.QuizGetter
 import icu.hku.vekumin.quiz.QuizResult
+import icu.hku.vekumin.quiz.data.QuizConfig
 import icu.hku.vekumin.ui.theme.VekuminTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -105,7 +108,11 @@ class AlarmActivity : ComponentActivity() {
                                 totalQuestionsCount = questions.size,
                                 currentQuestionIndex = currentQuestionIndex,
                                 onAnswerSelected = { isCorrect ->
-                                    handleAnswer(isCorrect)
+                                    handleAnswer(
+                                        isCorrect,
+                                        QuizConfig.load(applicationContext)?.get("health")?.toInt()
+                                            ?: 5
+                                    )
                                 })
                         }
                     }
@@ -117,19 +124,26 @@ class AlarmActivity : ComponentActivity() {
         }
     }
 
-    private fun handleAnswer(isCorrect: Boolean) {
+    private fun handleAnswer(isCorrect: Boolean, maxHealth: Int) {
         if (isCorrect) {
             correctAnswersCount++
             Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show()
             currentQuestionIndex++
             loadQuestion()
         } else {
-            if ((5 - (currentQuestionIndex - correctAnswersCount)) == 0) {
-                Toast.makeText(this, "Check Your Social Media :)", Toast.LENGTH_SHORT).show()
-                finish()
-            }
             wrongAnswersCount++
             currentQuestionIndex++
+            if ((maxHealth - (currentQuestionIndex - correctAnswersCount)) == 0) {
+                val context = applicationContext
+                Toast.makeText(this, "Check Your Social Media :)", Toast.LENGTH_SHORT).show()
+                val postConfig = PostConfig.load(context)
+                val title = postConfig?.get("title") ?: "Err Code: 404"
+                val content = postConfig?.get("content") ?: "Err Code: 404"
+                CoroutineScope(Dispatchers.IO).launch {
+                    Secret.load(context)?.createPoster()?.post(title, content)
+                }
+                finish()
+            }
             Toast.makeText(this, "Wrong Answer :(", Toast.LENGTH_SHORT).show()
             loadQuestion()
         }
@@ -151,6 +165,9 @@ fun AlarmScreen(
     // get the current time
     val currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
 
+    val context = activity.applicationContext
+    val maxHealth = QuizConfig.load(context)?.get("health")?.toInt() ?: 5
+
     // countdown state
     var countdown by remember { mutableIntStateOf(60) }
 
@@ -165,6 +182,12 @@ fun AlarmScreen(
         }
         // destroy current screen
         Toast.makeText(activity, "Check Your Social Media :)", Toast.LENGTH_SHORT).show()
+        val postConfig = PostConfig.load(context)
+        val title = postConfig?.get("title") ?: "Err Code: 404"
+        val content = postConfig?.get("content") ?: "Err Code: 404"
+        CoroutineScope(Dispatchers.IO).launch {
+            Secret.load(context)?.createPoster()?.post(title, content)
+        }
         activity.finish()
     }
 
@@ -211,7 +234,7 @@ fun AlarmScreen(
                 fontSize = 24.sp
             )
             Text(
-                text = "${5 - (currentQuestionIndex - correctAnswersCount)} ❤",
+                text = "${maxHealth - (currentQuestionIndex - correctAnswersCount)} ❤",
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.White.copy(alpha = 0.8f),
                 fontSize = 24.sp

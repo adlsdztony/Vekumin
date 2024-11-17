@@ -21,9 +21,14 @@ class QuizGetter {
     fun fetchQuizData(context: Context): QuizResponse? {
         val config = QuizConfig.load(context)
         val amount = config?.get("amount") ?: "5"
-        val category = config?.get("category") ?: "18"
-        val difficulty = config?.get("difficulty") ?: "easy"
-        val url = "https://opentdb.com/api.php?amount=$amount&category=$category&difficulty=$difficulty&type=boolean"
+        var difficulty = config?.get("difficulty") ?: "1"
+        difficulty = when (difficulty) {
+            "1" -> "easy"
+            "2" -> "medium"
+            "3" -> "hard"
+            else -> "easy"
+        }
+        val url = "https://opentdb.com/api.php?amount=$amount&difficulty=$difficulty&type=boolean"
 
         val client = OkHttpClient()
         val request = Request.Builder()
