@@ -206,8 +206,8 @@ fun AlarmScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(64.dp)
         ) {
+            Spacer(modifier = Modifier.height(128.dp))
             Text(
                 text = currentTime,
                 modifier = modifier,
