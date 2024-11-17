@@ -127,7 +127,7 @@ class AlarmActivity : ComponentActivity() {
     private fun handleAnswer(isCorrect: Boolean, maxHealth: Int) {
         if (isCorrect) {
             correctAnswersCount++
-            Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show()
             currentQuestionIndex++
             loadQuestion()
         } else {
@@ -144,7 +144,7 @@ class AlarmActivity : ComponentActivity() {
                 }
                 finish()
             }
-            Toast.makeText(this, "Wrong Answer :(", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, "Wrong Answer :(", Toast.LENGTH_SHORT).show()
             loadQuestion()
         }
     }
