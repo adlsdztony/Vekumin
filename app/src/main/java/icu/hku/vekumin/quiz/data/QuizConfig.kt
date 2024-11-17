@@ -51,25 +51,3 @@ data class QuizConfig(var values: Map<String, String>) {
         return this
     }
 }
-
-
-
-//// test
-//fun main() {
-//    val quizConfig = QuizConfig(mapOf("key1" to "value1", "key2" to "value2"))
-//    println(quizConfig.get("key1")) // expect: value1
-//    println(quizConfig.get("key2")) // expect: value2
-//    println(quizConfig.get("key3")) // expect: null
-//
-//    quizConfig.set("key3", "value3")
-//    println(quizConfig.get("key3")) // expect: value3
-//
-//    quizConfig.set("key3", "value4")
-//    println(quizConfig.get("key3")) // expect: value4
-//
-//    val quizConfig3 = quizConfig.remove("key2")
-//    println(quizConfig3.get("key2")) // expect: null
-//
-//    val quizConfig4 = quizConfig3.clear()
-//    println(quizConfig4.get("key1")) // expect: null
-//}

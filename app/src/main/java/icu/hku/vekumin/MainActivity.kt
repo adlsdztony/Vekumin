@@ -103,14 +103,14 @@ class MainActivity : ComponentActivity() {
         // initialize the quiz config
         val quizConfig = QuizConfig.load(applicationContext) ?: QuizConfig(values = emptyMap())
         if (quizConfig.values.isEmpty()) {
-            quizConfig.set("amount", "5").set("difficulty", "easy").set("health", "3")
+            quizConfig.set("amount", "5").set("difficulty", "1").set("health", "3")
                 .save(applicationContext)
         }
 
         // initialize the post config
         val postConfig = PostConfig.load(applicationContext) ?: PostConfig(values = emptyMap())
         if (postConfig.values.isEmpty()) {
-            postConfig.set("title", "Post Title").set("content", "Post Content")
+            postConfig.set("title", "Vekumin Auto Post").set("content", "I overslept.")
                 .save(applicationContext)
         }
 

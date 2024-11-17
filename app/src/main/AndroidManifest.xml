@@ -25,6 +25,11 @@
         android:theme="@style/Theme.Vekumin"
         tools:targetApi="35">
         <activity
+            android:name=".PostActivity"
+            android:exported="false"
+            android:label="@string/title_activity_post"
+            android:theme="@style/Theme.Vekumin" />
+        <activity
             android:name=".AlarmActivity"
             android:exported="false"
             android:label="@string/title_activity_alarm"
