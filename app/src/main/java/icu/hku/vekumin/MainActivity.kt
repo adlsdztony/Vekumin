@@ -156,14 +156,6 @@ fun AppBar() {
         }) {
             Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
         }
-        IconButton(
-            onClick = {
-                val intent = Intent(context, AlarmActivity::class.java)
-                context.startActivity(intent)
-            }
-        ) {
-            Icon(imageVector = Icons.Default.Build, contentDescription = "Alarm")
-        }
     })
 }
 
