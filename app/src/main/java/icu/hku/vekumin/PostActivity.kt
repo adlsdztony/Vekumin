@@ -92,7 +92,7 @@ fun PostScreen(modifier: Modifier = Modifier, postViewModel: PostViewModel) {
             onValueChange = { newValue -> postViewModel.title = newValue },
             label = { Text("Title") },
             modifier = Modifier
-                .weight(0.1f)
+                .weight(0.2f)
                 .fillMaxWidth()
                 .onFocusChanged { focusState -> isTitleFocused = focusState.isFocused }
         )
