@@ -55,8 +55,9 @@ class AlarmSetter {
             set(Calendar.SECOND, 0)
         }
         var aheadDays = 0
+        val date: Date = Date()
+
         if (alarmConfig.repeat) {
-            val date: Date = Date()
             val dayOfWeek = date.toInstant().atZone(java.time.ZoneId.systemDefault()).dayOfWeek.value
             aheadDays = alarmConfig.daysOfWeek
                 .map { if (it >= dayOfWeek) it - dayOfWeek else 7 - dayOfWeek + it }
@@ -78,7 +79,10 @@ class AlarmSetter {
                     .minOrNull() ?: 0
             }
         } else {
-            if (calendar.before(Calendar.getInstance())) {
+            if (date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalTime().isAfter(
+                    java.time.LocalTime.of(getHour(targetTime), getMinute(targetTime))
+                )
+            ){
                 aheadDays = 1
             }
         }
