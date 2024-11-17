@@ -250,8 +250,9 @@ fun AlarmScreen(
             Text(
                 text = question,
                 style = MaterialTheme.typography.bodyLarge,
+                color = Color.White,
                 fontSize = 24.sp,
-                color = Color.White
+                lineHeight = 32.sp
             )
             Column(modifier = Modifier.padding(0.dp, 32.dp)) {
                 SingleChoiceSegmentedButtonRow {
