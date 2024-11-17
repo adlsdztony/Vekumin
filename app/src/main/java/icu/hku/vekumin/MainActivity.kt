@@ -15,6 +15,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
@@ -22,29 +23,27 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelProvider
-import icu.hku.vekumin.alarm.data.AlarmConfig
-import icu.hku.vekumin.alarm.data.AlarmConfigDatabase
-import icu.hku.vekumin.ui.theme.VekuminTheme
-import icu.hku.vekumin.viewModels.alarm.AlarmViewModel
-import java.util.Locale
-import icu.hku.vekumin.viewModels.alarm.AlarmRepository
-import icu.hku.vekumin.viewModels.alarm.AlarmViewModelFactory
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.ViewModelProvider
 import icu.hku.vekumin.alarm.AlarmSetter
+import icu.hku.vekumin.alarm.data.AlarmConfig
+import icu.hku.vekumin.alarm.data.AlarmConfigDatabase
 import icu.hku.vekumin.post.data.PostConfig
 import icu.hku.vekumin.post.data.Secret
 import icu.hku.vekumin.quiz.data.QuizConfig
+import icu.hku.vekumin.ui.theme.VekuminTheme
+import icu.hku.vekumin.viewModels.alarm.AlarmRepository
+import icu.hku.vekumin.viewModels.alarm.AlarmViewModel
+import icu.hku.vekumin.viewModels.alarm.AlarmViewModelFactory
+import java.util.Locale
 
 
 class MainActivity : ComponentActivity() {
@@ -156,30 +155,29 @@ fun AppBar() {
         }) {
             Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
         }
+//        IconButton(
+//            onClick = {
+//                val intent = Intent(context, AlarmActivity::class.java)
+//                context.startActivity(intent)
+//            }
+//        ) {
+//            Icon(imageVector = Icons.Default.Build, contentDescription = "Alarm")
+//        }
     })
 }
 
 @Composable
 fun TextClock(modifier: Modifier = Modifier) {
     val isDarkTheme = isSystemInDarkTheme()
-    // on below line we are creating
-    // a column on below sides.
+
     Column(
-        // on below line we are adding padding
-        // padding for our column and filling the max size.
         modifier = modifier
             .fillMaxWidth(),
-        // on below line we are adding
-        // horizontal alignment for our column
         horizontalAlignment = Alignment.CenterHorizontally,
-        // on below line we are adding
-        // vertical arrangement for our column
         verticalArrangement = Arrangement.Center
     ) {
 
-        // on below line we are creating a text clock.
         AndroidView(
-            // on below line we are initializing our text clock.
             factory = { context ->
                 TextClock(context).apply {
                     // on below line we are setting 24 hour format.
@@ -198,7 +196,6 @@ fun TextClock(modifier: Modifier = Modifier) {
                     }
                 }
             },
-            // on below line we are adding padding.
             modifier = Modifier.padding(0.dp, 24.dp),
         )
     }
