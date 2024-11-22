@@ -6,11 +6,12 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLEncoder
 
-class XPoster(val secret: Secret) : Postable {
+class BlueSkyPoster(val secret: Secret) : Postable {
+
     override fun post(title: String, content: String) {
         // encode message
         val message = URLEncoder.encode("$title\n$content", "utf-8")
-        val data = "message=$message&access_token=${secret.keys["access_token"]}&access_token_secret=${secret.keys["access_token_secret"]}"
+        val data = "message=$message&username=${secret.keys["username"]}&password=${secret.keys["password"]}"
 
         val url = secret.platform.postUrl.toString() + "?" + data
 
@@ -29,15 +30,3 @@ class XPoster(val secret: Secret) : Postable {
         }
     }
 }
-
-
-//// Test
-//fun main()
-//{
-//    val secret = Secret(
-//        Platform.X,
-//        mapOf("access_token" to "fake", "access_token_secret" to "fake")
-//    )
-//    val poster = XPoster(secret)
-//    poster.post("title", "content")
-//}
