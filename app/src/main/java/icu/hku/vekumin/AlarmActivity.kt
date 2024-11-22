@@ -1,6 +1,7 @@
 package icu.hku.vekumin
 
 import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -137,8 +138,10 @@ class AlarmActivity : ComponentActivity() {
                 val context = applicationContext
                 Toast.makeText(this, "Check Your Social Media :)", Toast.LENGTH_SHORT).show()
                 val postConfig = PostConfig.load(context)
-                val title = postConfig?.get("title") ?: "Err Code: 404"
-                val content = postConfig?.get("content") ?: "Err Code: 404"
+                var title = postConfig?.get("title") ?: "Err Code: 404"
+                var content = postConfig?.get("content") ?: "Err Code: 404"
+                title = formatMessage(title, context)
+                content = formatMessage(content, context)
                 CoroutineScope(Dispatchers.IO).launch {
                     Secret.load(context)?.createPoster()?.post(title, content)
                 }
@@ -183,8 +186,10 @@ fun AlarmScreen(
         // destroy current screen
         Toast.makeText(activity, "Check Your Social Media :)", Toast.LENGTH_SHORT).show()
         val postConfig = PostConfig.load(context)
-        val title = postConfig?.get("title") ?: "Err Code: 404"
-        val content = postConfig?.get("content") ?: "Err Code: 404"
+        var title = postConfig?.get("title") ?: "Err Code: 404"
+        var content = postConfig?.get("content") ?: "Err Code: 404"
+        title = formatMessage(title, context)
+        content = formatMessage(content, context)
         CoroutineScope(Dispatchers.IO).launch {
             Secret.load(context)?.createPoster()?.post(title, content)
         }
@@ -204,8 +209,7 @@ fun AlarmScreen(
         )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
+            modifier = Modifier.align(Alignment.TopCenter)
         ) {
             Spacer(modifier = Modifier.height(128.dp))
             Text(
@@ -282,6 +286,33 @@ fun AlarmScreen(
             Spacer(modifier = Modifier.height(64.dp))
         }
     }
+}
+
+private fun formatMessage(content: String, context: Context): String {
+    val questionConfig = QuizConfig.load(context)
+    var modifiedContent = content
+    modifiedContent = modifiedContent.replace(
+        "\${Alarm Time}", LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
+    ).replace(
+        "\${Day of Weeks}", when (java.time.LocalDate.now().dayOfWeek.value) {
+            1 -> "Monday"
+            2 -> "Tuesday"
+            3 -> "Wednesday"
+            4 -> "Thursday"
+            5 -> "Friday"
+            6 -> "Saturday"
+            7 -> "Sunday"
+            else -> "Unknown"
+        }
+    ).replace("\${Question Amount}", questionConfig?.get("amount") ?: "5").replace(
+        "\${Question Difficulty}", when (questionConfig?.get("difficulty")) {
+            "1" -> "easy"
+            "2" -> "medium"
+            "3" -> "hard"
+            else -> "easy"
+        }
+    )
+    return modifiedContent
 }
 
 @Preview(showBackground = true)
